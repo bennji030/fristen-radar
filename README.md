@@ -1,2 +1,2 @@
 # fristen-radar
-Findet Fristen für wichtiger Termine auf Uni Seite und Uni Email mit KI
+Findet Fristen für wichtige Termine auf Uni Seite und Uni Email mit KI
