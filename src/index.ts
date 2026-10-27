@@ -1,6 +1,9 @@
 // importiert Anthropic API
 import Anthropic from "@anthropic-ai/sdk";
-
+// Importiert Zod für die Verabeitung der Claude Antowort in die richtige Form
+import { z } from "zod";
+// Übersetzt Zod Schema in die Antwort die Api versteht
+import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 type Pruefungsform = "schriftlich" | "mündlich" | "portfolio";
 
 type Frist = {
@@ -10,6 +13,17 @@ type Frist = {
     pruefungsform?: Pruefungsform
 };
 
+// Vorgegebens Schema für Claude durch Zod
+const FristSchema = z.object({
+    titel: z.string(),
+    datum: z.string().describe("Datum in Format JJJJ-MM-TT"),
+    kurs: z.string()
+});
+
+// Claude antwortet mit einem Objekt, darin eine Liste mit Fristen
+const AntwortSchema = z.object({
+    fristen: z.array(FristSchema)
+});
 
 const beispiel: Frist = {
     titel: "Prüfungsanmeldung",
@@ -40,16 +54,30 @@ Viele Grüße, Ihr SuS-Team
 `;
 
 // Schickt die Anfrage mit Spezifikationen (Kann man auch auf ein billigers Modell stellen, z.b HAIKU was etwas 40mal billiger ist als OPUS)
-const antwort = await client.messages.create({
+// Schickt die Mail an Claude, Antwort kommt direkt im Format vom AntwortSchema zurück (parse prüft das mit Zod)
+const antwort = await client.messages.parse({
     model: "claude-opus-5-5",
     max_tokens: 16000,
     messages: [
-        { role: "user", content: `Welche Fristen stehen in dieser Mail?\n${mailText}` }
-    ]
+        { role: "user", content: `Finde alle Fristen in dieser Mail:\n${mailText}` }
+    ],
+    output_config: {
+        format: zodOutputFormat(AntwortSchema)
+    }
 });
-// Da die Antwort von Claude aus Blöcken besteht und man nicht weiß wie viele Blöcke es genau sind gehen wir alle durch bis wir den Text Block finden
-for (const block of antwort.content) {
-    if (block.type === "text") {
-        console.log(block.text);
+
+
+if (!antwort.parsed_output) {                                                                                   // Falls Antwort nciht dem Schema entspricht
+    console.log("Claude hat keine gültige Antwort geliefert");
+} else {                                                                                                        // Die Liste aus Fristen wird durch Map in viele einzelne Listen geteilt in dem vorgegeben Stil
+const fristen: Frist[] = antwort.parsed_output.fristen.map((f) => ({                                            
+        titel: f.titel,
+        datum: new Date(f.datum),                                                                               // new Date macht aus dem eigentlichen String ein richtiges Datum. Wandelt JSON in Date Datentyp um
+        kurs: f.kurs
+    }));
+
+    // For schleife gibt jede Frist korrekt aus und ändert die Art das Datum anzugeben von ISO auf Deutsche Norm
+    for (const frist of fristen) {
+        console.log(`${frist.kurs}: ${frist.titel} bis ${frist.datum.toLocaleDateString("de-DE")}`);
     }
 }
