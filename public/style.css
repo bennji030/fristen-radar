@@ -1,0 +1,38 @@
+body {
+    font-family: system-ui, sans-serif;
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    color: #222;
+}
+
+h1 {
+    margin-bottom: 0.2rem;
+}
+
+p {
+    color: #666;
+    margin-top: 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    text-align: left;
+    padding: 0.6rem;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background: #f4f4f4;
+}
+
+/* Datum nicht umbrechen, Ziffern gleich breit damit sie untereinander stehen */
+td:first-child {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}

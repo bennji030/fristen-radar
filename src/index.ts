@@ -1,5 +1,5 @@
 // wir impoortieren die db datei
-import { db } from "./db.js";
+import { datenbankOeffnen, kommendeFristen } from "./db.js";
 // js trotz ts datei weil nach dem kompellieren die datei zu js wird
 import { mailsLesen } from "./mails.js";
 // importiert Anthropic API
@@ -44,6 +44,9 @@ if (beispiel.pruefungsform) {
 console.log(`${beispiel.kurs}${formText}: ${beispiel.titel} bis ${beispiel.datum.toLocaleDateString("de-DE")}`);
 
 
+
+// Öffnet die echte Datenbank (wird beim ersten Mal angelegt)
+const db = datenbankOeffnen("fristen.db");
 
 // Erstellt durch einen Client die Verbindung zu Claude
 const client = new Anthropic();
@@ -111,13 +114,8 @@ for (const mail of mails) {
     }
 }
 
-    // Alle kommenden Fristen sortiert aus der Datenbank holen (Datum gleich in deutschem Format)
-const kommende = db.prepare(`
-    SELECT strftime('%d.%m.%Y', datum) AS datum_de, kurs, titel
-    FROM fristen
-    WHERE datum >= date('now')
-    ORDER BY datum
-`).all();
+// Alle kommenden Fristen sortiert aus der Datenbank holen (Abfrage steht jetzt in db.ts)
+const kommende = kommendeFristen(db);
 
 console.log("\n=== Kommende Fristen ===");
 for (const f of kommende) {
