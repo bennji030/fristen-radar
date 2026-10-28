@@ -50,7 +50,7 @@ const client = new Anthropic();
 
 
 // Liest alle Mails aus dem Ordner (erst Beispiel Mails, später "mails")
-const mails = await mailsLesen("beispiel-mails");
+const mails = await mailsLesen("mails");
 
 
 // kontrolle ob übergebene daten auch fehlerfrei und risikofrei sind ( gefahr auf sql injection)
@@ -109,4 +109,17 @@ for (const mail of mails) {
         // Erst hier merken (nur wenn Claude eine gültige Antwort hatte, sonst nächstes Mal neuer Versuch)
         alsVerarbeitetMerken.run(mail.datei);
     }
+}
+
+    // Alle kommenden Fristen sortiert aus der Datenbank holen (Datum gleich in deutschem Format)
+const kommende = db.prepare(`
+    SELECT strftime('%d.%m.%Y', datum) AS datum_de, kurs, titel
+    FROM fristen
+    WHERE datum >= date('now')
+    ORDER BY datum
+`).all();
+
+console.log("\n=== Kommende Fristen ===");
+for (const f of kommende) {
+    console.log(`${f.datum_de}  ${f.kurs}: ${f.titel}`);
 }
