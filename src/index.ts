@@ -1,3 +1,5 @@
+// js trotz ts datei weil nach dem kompellieren die datei zu js wird
+import { mailsLesen } from "./mails.js";
 // importiert Anthropic API
 import Anthropic from "@anthropic-ai/sdk";
 // Importiert Zod für die Verabeitung der Claude Antowort in die richtige Form
@@ -45,39 +47,39 @@ console.log(`${beispiel.kurs}${formText}: ${beispiel.titel} bis ${beispiel.datum
 const client = new Anthropic();
 
 
-// Beispiel Email
-const mailText = `
-Liebe Studierende,
-die Anmeldung zur Klausur "Signale und Systeme" ist vom 02.11. bis 16.11.2026 in MOSES möglich.
-Die Abgabe des 2. Übungsblatts ist am 09.11.2026 um 23:59 Uhr.
-Viele Grüße, Ihr SuS-Team
-`;
+// Liest alle Mails aus dem Ordner (erst Beispiel Mails, später "mails")
+const mails = await mailsLesen("beispiel-mails");
 
-// Schickt die Anfrage mit Spezifikationen (Kann man auch auf ein billigers Modell stellen, z.b HAIKU was etwas 40mal billiger ist als OPUS)
-// Schickt die Mail an Claude, Antwort kommt direkt im Format vom AntwortSchema zurück (parse prüft das mit Zod)
-const antwort = await client.messages.parse({
-    model: "claude-opus-5-5",
-    max_tokens: 16000,
-    messages: [
-        { role: "user", content: `Finde alle Fristen in dieser Mail:\n${mailText}` }
-    ],
-    output_config: {
-        format: zodOutputFormat(AntwortSchema)
-    }
-});
+// Jede Mail wird einzeln an Claude geschickt (ein Aufruf pro Mail)
+for (const mail of mails) {
+    console.log(`\n--- ${mail.datei} ---`);                                                                    // \n für Leerzeile, damit man die Mails besser auseinanderhält
+
+    // Schickt die Anfrage mit Spezifikationen (Kann man auch auf ein billigers Modell stellen, z.b HAIKU was etwas 40mal billiger ist als OPUS)
+    // Schickt die Mail an Claude, Antwort kommt direkt im Format vom AntwortSchema zurück (parse prüft das mit Zod)
+    const antwort = await client.messages.parse({
+        model: "claude-opus-5-5",
+        max_tokens: 16000,
+        messages: [
+            { role: "user", content: `Finde alle Fristen in dieser Mail. Relative Angaben wie "morgen" rechnest du vom Datum der Mail aus.\n${mail.text}` }     // Hinweis wegen "morgen" (Claude kennt sonst das Datum nicht)
+        ],
+        output_config: {
+            format: zodOutputFormat(AntwortSchema)
+        }
+    });
 
 
-if (!antwort.parsed_output) {                                                                                   // Falls Antwort nciht dem Schema entspricht
-    console.log("Claude hat keine gültige Antwort geliefert");
-} else {                                                                                                        // Die Liste aus Fristen wird durch Map in viele einzelne Listen geteilt in dem vorgegeben Stil
-const fristen: Frist[] = antwort.parsed_output.fristen.map((f) => ({                                            
-        titel: f.titel,
-        datum: new Date(f.datum),                                                                               // new Date macht aus dem eigentlichen String ein richtiges Datum. Wandelt JSON in Date Datentyp um
-        kurs: f.kurs
-    }));
+    if (!antwort.parsed_output) {                                                                               // Falls Antwort nciht dem Schema entspricht
+        console.log("Claude hat keine gültige Antwort geliefert");
+    } else {                                                                                                    // Die Liste aus Fristen wird durch Map in viele einzelne Listen geteilt in dem vorgegeben Stil
+        const fristen: Frist[] = antwort.parsed_output.fristen.map((f) => ({
+            titel: f.titel,
+            datum: new Date(f.datum),                                                                           // new Date macht aus dem eigentlichen String ein richtiges Datum. Wandelt JSON in Date Datentyp um
+            kurs: f.kurs
+        }));
 
-    // For schleife gibt jede Frist korrekt aus und ändert die Art das Datum anzugeben von ISO auf Deutsche Norm
-    for (const frist of fristen) {
-        console.log(`${frist.kurs}: ${frist.titel} bis ${frist.datum.toLocaleDateString("de-DE")}`);
+        // For schleife gibt jede Frist korrekt aus und ändert die Art das Datum anzugeben von ISO auf Deutsche Norm
+        for (const frist of fristen) {
+            console.log(`${frist.kurs}: ${frist.titel} bis ${frist.datum.toLocaleDateString("de-DE")}`);
+        }
     }
 }

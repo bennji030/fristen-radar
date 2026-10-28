@@ -1,0 +1,27 @@
+Betreff: [SoSe 2027] INFO: Klausuranmeldung Zweittermin
+
+Von: Max Mustermann (über Uni-Forum) max.mustermann@example.com An: Teststudent teststudent@example.com Datum: Mittwoch, 24. März 2027, 14:30 Uhr
+
+[SoSe 2027] INFO -> Foren -> Ankündigungen -> Klausuranmeldung Zweittermin
+
+Liebe Studierende,
+
+bitte denkt daran, dass die Teilnahme an der INFO-Klausur am 8. April 2027 eine ordnungsgemäße Anmeldung voraussetzt.
+
+Wenn ihr an der Klausur teilnehmen möchtet, könnt ihr euch noch bis zum 1. April 2027 über das fiktive Studierendenportal anmelden.
+
+Anmeldelink: https://example.com/studierendenportal/klausuranmeldung
+
+Wenn ihr einen Nachteilsausgleich habt, sendet diesen bitte bis zum 1. April 2027 an nachteilsausgleich@example.com, damit wir diesen berücksichtigen können.
+
+Die Zusendung der Bewilligung ersetzt NICHT die reguläre Klausuranmeldung über das Studierendenportal.
+
+Die Termine der Sprechstunden zur Klausurvorbereitung findet ihr im Studierendenportal.
+
+Viele Grüße
+
+Max Mustermann Fiktiver Fachbereich Informatik Musteruniversität
+
+Dies ist eine fiktive Kopie einer Mitteilung aus einem universitären Forum.
+
+Alle Namen, E-Mail-Adressen, Links und Termine sind synthetische Testdaten.

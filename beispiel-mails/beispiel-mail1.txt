@@ -1,0 +1,32 @@
+Betreff: [WiSe 2026/27] INFO: Klausuranmeldung bis morgen, 23:55 Uhr
+
+Von: Erika Beispiel (über Uni-Forum) erika.beispiel@example.com An: Teststudent teststudent@example.com Datum: Mittwoch, 27. Januar 2027, 11:10 Uhr
+
+[WiSe 2026/27] INFO -> Foren -> Ankündigungen -> Klausuranmeldung
+
+Liebe alle,
+
+wer an der Klausur zum ersten Termin in der kommenden Woche teilnehmen möchte, muss sich spätestens MORGEN ABEND UM 23:55 UHR über das fiktive Studierendenportal registrieren.
+
+Eine Abmeldung ist bis zum Tag vor der Klausur möglich. Die Anmeldefrist endet morgen. Ohne Anmeldung kann die Klausur nicht mitgeschrieben werden.
+
+Inzwischen gibt es eine DEMOKLAUSUR, mit der ihr das Prüfungsverfahren vorab testen könnt. Dabei könnt ihr beispielsweise die Anmeldung, die Zwei-Faktor-Authentifizierung und die Einverständniserklärung ausprobieren.
+
+Die Anmeldungen für die Demoklausur werden manuell hinterlegt. Es kann bis zu einem Tag dauern, bis eure Registrierung erfasst ist.
+
+Bitte überprüft, ob ihr Zugriff auf die Demoklausur habt. Die echte Klausur wird entsprechend der regulären Prüfungsanmeldung konfiguriert.
+
+Wichtige Angaben:
+
+Anmeldefrist: Donnerstag, 28. Januar 2027, 23:55 Uhr
+Voraussichtlicher Klausurtermin: Montag, 1. Februar 2027
+Demoklausur: freiwilliger Vorbereitungstest
+Abmeldung: bis zum Tag vor der Klausur
+
+Fiktiver Anmeldelink: https://example.com/portal/pruefungsanmeldung
+
+Liebe Grüße
+
+Erika Beispiel Fiktiver Prüfungsservice Musteruniversität
+
+Dies ist eine vollständig fiktive Testnachricht. Namen, E-Mail-Adressen, Links und Termine wurden ausschließlich für Testzwecke erstellt.
