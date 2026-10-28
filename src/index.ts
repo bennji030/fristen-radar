@@ -1,3 +1,5 @@
+// wir impoortieren die db datei
+import { db } from "./db.js";
 // js trotz ts datei weil nach dem kompellieren die datei zu js wird
 import { mailsLesen } from "./mails.js";
 // importiert Anthropic API
@@ -50,8 +52,25 @@ const client = new Anthropic();
 // Liest alle Mails aus dem Ordner (erst Beispiel Mails, später "mails")
 const mails = await mailsLesen("beispiel-mails");
 
+
+// kontrolle ob übergebene daten auch fehlerfrei und risikofrei sind ( gefahr auf sql injection)
+const einfuegen = db.prepare(`
+    INSERT OR IGNORE INTO fristen (titel, datum, kurs, quelle)
+    VALUES (?, ?, ?, ?)
+`);
+
+// Schaut nach ob die Mail schon verarbeitet wurde bzw. merkt sie sich danach (damit Claude jede Mail nur einmal bekommt)
+const schonVerarbeitet = db.prepare(`SELECT datei FROM verarbeitet WHERE datei = ?`);
+const alsVerarbeitetMerken = db.prepare(`INSERT INTO verarbeitet (datei) VALUES (?)`);
+
 // Jede Mail wird einzeln an Claude geschickt (ein Aufruf pro Mail)
 for (const mail of mails) {
+    // Schon verarbeitete Mails überspringen (spart Geld und verhindert doppelte Fristen)
+    if (schonVerarbeitet.get(mail.datei)) {
+        console.log(`${mail.datei} schon verarbeitet, wird übersprungen`);
+        continue;                                                                                               // springt direkt zur nächsten Mail
+    }
+
     console.log(`\n--- ${mail.datei} ---`);                                                                    // \n für Leerzeile, damit man die Mails besser auseinanderhält
 
     // Schickt die Anfrage mit Spezifikationen (Kann man auch auf ein billigers Modell stellen, z.b HAIKU was etwas 40mal billiger ist als OPUS)
@@ -81,5 +100,13 @@ for (const mail of mails) {
         for (const frist of fristen) {
             console.log(`${frist.kurs}: ${frist.titel} bis ${frist.datum.toLocaleDateString("de-DE")}`);
         }
+
+        // Speichert jede Frist in der Datenbank (Datum als ISO Text, Dateiname als Quelle)
+        for (const f of antwort.parsed_output.fristen) {
+            einfuegen.run(f.titel, f.datum, f.kurs, mail.datei);
+        }
+
+        // Erst hier merken (nur wenn Claude eine gültige Antwort hatte, sonst nächstes Mal neuer Versuch)
+        alsVerarbeitetMerken.run(mail.datei);
     }
 }
