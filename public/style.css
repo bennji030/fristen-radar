@@ -1,38 +1,219 @@
+/* Heller Modus: eierschalenfarbenes Papier, dunkelbraune Schrift, Kugelschreiber-Blau als Akzent */
+:root {
+    --papier: #f6f1e3;
+    --gitter: #d3dbdf;
+    --karte: #fffdf5;
+    --text: #2b2118;
+    --titel: #1a120c;
+    --text-leise: #7a6a58;
+    --linie: #e7dec9;
+    --akzent: #1e3a8a;
+    --akzent-hell: #ece4cf;
+    --akzent-text: #fffdf5;
+    --schatten: rgba(80, 60, 30, 0.18);
+    /* feines Rauschen über dem Papier (SVG als Bild), damit es nicht ganz glatt aussieht */
+    --textur: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.27 0 0 0 0 0.15 0 0 0 0.07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Dunkelmodus: nur die Farben tauschen, der Rest vom CSS bleibt gleich (dafür die Variablen)
+   Zweimal vorhanden: einmal automatisch nach Systemeinstellung, einmal wenn man den Knopf benutzt hat */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="hell"]) {
+        --papier: #0d1326;
+        --gitter: #1b2644;
+        --karte: #151b2e;
+        --text: #e2e8f0;
+        --titel: #dbeafe;
+        --text-leise: #94a3b8;
+        --linie: #26304a;
+        --akzent: #60a5fa;
+        --akzent-hell: #1e2a4a;
+        --akzent-text: #0b1020;
+        --schatten: rgba(0, 0, 0, 0.4);
+        --textur: none;
+    }
+}
+
+:root[data-theme="dunkel"] {
+    --papier: #0d1326;
+    --gitter: #1b2644;
+    --karte: #151b2e;
+    --text: #e2e8f0;
+    --titel: #dbeafe;
+    --text-leise: #94a3b8;
+    --linie: #26304a;
+    --akzent: #60a5fa;
+    --akzent-hell: #1e2a4a;
+    --akzent-text: #0b1020;
+    --schatten: rgba(0, 0, 0, 0.4);
+    --textur: none;
+}
+
+/* Karopapier: zwei dünne Linien-Verläufe (waagrecht und senkrecht) auf hellem Grund, alle 28px eine Linie */
+html {
+    min-height: 100%;
+    background-color: var(--papier);
+    background-image:
+        var(--textur),
+        linear-gradient(var(--gitter) 1px, transparent 1px),
+        linear-gradient(90deg, var(--gitter) 1px, transparent 1px);
+    background-size: 160px 160px, 28px 28px, 28px 28px;
+}
+
 body {
-    font-family: system-ui, sans-serif;
+    font-family: "Figtree", system-ui, sans-serif;
     max-width: 800px;
-    margin: 2rem auto;
-    padding: 0 1rem;
-    color: #222;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    color: var(--text);
 }
 
+/* Überschriften in Outfit (Schrift der Vorlage), falls sie nicht lädt gilt system-ui */
 h1 {
-    margin-bottom: 0.2rem;
+    font-family: "Outfit", system-ui, sans-serif;
+    font-size: 2.4rem;
+    color: var(--titel);
+    margin: 0 0 0.3rem;
 }
 
-p {
-    color: #666;
-    margin-top: 0;
+.untertitel {
+    color: var(--text-leise);
+    margin: 0 0 1.2rem;
 }
 
+/* Kleine Pille mit der Anzahl der Fristen */
+.anzahl {
+    display: inline-block;
+    margin: 0 0 1.2rem;
+    padding: 0.25rem 0.8rem;
+    border-radius: 999px;
+    background: var(--akzent-hell);
+    color: var(--akzent);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Suchleiste (noch ohne Funktion, nur das Aussehen) */
+.suche {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.8rem 1.1rem;
+    border: 1px solid var(--linie);
+    border-radius: 999px;
+    background: var(--karte);
+    color: var(--text);
+    font: inherit;
+    margin-bottom: 0.9rem;
+}
+
+.suche:focus {
+    outline: 2px solid var(--akzent);
+    outline-offset: 1px;
+}
+
+/* Filter Knöpfe (Pillen), der aktive ist ausgefüllt */
+.filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.chip {
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--linie);
+    border-radius: 999px;
+    background: var(--karte);
+    color: var(--text);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.chip:hover {
+    border-color: var(--akzent);
+}
+
+.chip.aktiv {
+    background: var(--akzent);
+    border-color: var(--akzent);
+    color: var(--akzent-text);
+}
+
+/* Tabelle als Karte (overflow hidden, damit die Ecken auch außen abgerundet sind) */
 table {
     width: 100%;
     border-collapse: collapse;
+    background: var(--karte);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 2px 6px var(--schatten);
 }
 
 th,
 td {
     text-align: left;
-    padding: 0.6rem;
-    border-bottom: 1px solid #ddd;
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--linie);
 }
 
 th {
-    background: #f4f4f4;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-leise);
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+/* Zeile leicht hervorheben, wenn die Maus drüber ist (die th-Zeile hat keine td) */
+tr:hover td {
+    background: var(--akzent-hell);
 }
 
 /* Datum nicht umbrechen, Ziffern gleich breit damit sie untereinander stehen */
 td:first-child {
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}
+
+/* Kursname in Akzentfarbe */
+td:nth-child(2) {
+    color: var(--akzent);
+    font-weight: 600;
+}
+
+/* Auf dem Handy etwas weniger Platz verbrauchen */
+@media (max-width: 520px) {
+    h1 {
+        font-size: 1.9rem;
+    }
+
+    th,
+    td {
+        padding: 0.7rem 0.6rem;
+    }
+}
+
+/* Knopf für Tag und Nacht, oben rechts */
+.modus {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    width: 2.6rem;
+    height: 2.6rem;
+    border: 1px solid var(--linie);
+    border-radius: 999px;
+    background: var(--karte);
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 2px 6px var(--schatten);
+}
+
+.modus:hover {
+    border-color: var(--akzent);
 }

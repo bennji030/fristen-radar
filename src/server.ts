@@ -41,15 +41,57 @@ const server = createServer(async (req, res) => {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Fristen-Radar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600&family=Outfit:wght@600;700&display=swap">
     <link rel="stylesheet" href="/style.css">
+    <script>
+        // Gespeicherten Modus sofort setzen (im head, damit die Seite nicht kurz in der falschen Farbe aufblitzt)
+        try {
+            const gespeichert = localStorage.getItem("modus");
+            if (gespeichert) document.documentElement.dataset.theme = gespeichert;
+        } catch (e) {}
+    </script>
 </head>
 <body>
+    <button class="modus" id="modus" aria-label="Zwischen hell und dunkel wechseln">🌙</button>
     <h1>Fristen-Radar</h1>
-    <p>${fristen.length} kommende Fristen</p>
+    <p class="untertitel">Nie wieder eine Frist verpassen.</p>
+    <span class="anzahl">${fristen.length} kommende Fristen</span>
+    <!-- Suche und Filter sind erstmal nur Optik, die Funktion kommt später -->
+    <input class="suche" type="search" placeholder="Fristen durchsuchen …">
+    <div class="filter">
+        <button class="chip aktiv">Alle</button>
+        <button class="chip">Uni</button>
+        <button class="chip">Privat</button>
+        <button class="chip">Sport</button>
+    </div>
     <table>
         <tr><th>Datum</th><th>Kurs</th><th>Was</th></tr>
         ${zeilen}
     </table>
+    <script>
+        // Knopf: zwischen hell und dunkel wechseln und die Wahl im Browser merken (localStorage)
+        const knopf = document.getElementById("modus");
+        const wurzel = document.documentElement;
+
+        function istDunkel() {
+            if (wurzel.dataset.theme) return wurzel.dataset.theme === "dunkel";
+            return matchMedia("(prefers-color-scheme: dark)").matches;   // sonst gilt die Systemeinstellung
+        }
+
+        function symbolSetzen() {
+            knopf.textContent = istDunkel() ? "☀️" : "🌙";   // zeigt, wohin man wechselt
+        }
+
+        knopf.addEventListener("click", () => {
+            const neu = istDunkel() ? "hell" : "dunkel";
+            wurzel.dataset.theme = neu;
+            try { localStorage.setItem("modus", neu); } catch (e) {}
+            symbolSetzen();
+        });
+
+        symbolSetzen();
+    </script>
 </body>
 </html>`);
 });
