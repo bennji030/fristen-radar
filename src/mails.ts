@@ -1,13 +1,14 @@
 import { readdir, readFile } from "node:fs/promises";
 
 
-// export damit due funktion im gesammten ordner nutzbar ist
+// export, damit der Typ auch in anderen Dateien benutzt werden kann
 export type Mail = {
     datei: string;
     text: string;
 };
 
-// async weil wir eine promis haben. funktion arbeitet weiter und gibt dann den "versprochenen" Wert weiter
+// async, weil Dateien lesen dauert: die Funktion gibt ein Promise zurück (der Wert kommt erst später)
+// Liest jede Datei im Ordner als Text ein
 export async function mailsLesen(ordner: string): Promise<Mail[]> {
     const dateien = await readdir(ordner);
     const mails: Mail[] = [];

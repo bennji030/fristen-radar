@@ -4,7 +4,8 @@ import { DatabaseSync } from "node:sqlite";
 export function datenbankOeffnen(pfad: string): DatabaseSync {
     const db = new DatabaseSync(pfad);
 
-    // .exec führt sql befehl aus -> öffne fristen falls exisitert sonst erstell ein neue datei mit diesen Vorgaben für die Tabelle
+    // exec führt den SQL Befehl aus (IF NOT EXISTS: Tabelle wird nur angelegt, wenn es sie noch nicht gibt)
+    // UNIQUE verhindert, dass dieselbe Frist aus mehreren Mails doppelt drin steht
     db.exec(`
         CREATE TABLE IF NOT EXISTS fristen (
             id INTEGER PRIMARY KEY,

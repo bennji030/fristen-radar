@@ -1,62 +1,46 @@
-// wir impoortieren die db datei
+// aus db.ts: Datenbank öffnen und kommende Fristen abfragen
 import { datenbankOeffnen, kommendeFristen } from "./db.js";
-// js trotz ts datei weil nach dem kompellieren die datei zu js wird
+// .js obwohl die Datei .ts heißt, weil daraus nach dem Kompilieren eine .js wird (sonst findet Node sie nicht)
 import { mailsLesen } from "./mails.js";
-// importiert Anthropic API
+// Anthropic SDK für die Verbindung zu Claude
 import Anthropic from "@anthropic-ai/sdk";
-// Importiert Zod für die Verabeitung der Claude Antowort in die richtige Form
+// Zod prüft, ob Claudes Antwort die richtige Form hat
 import { z } from "zod";
-// Übersetzt Zod Schema in die Antwort die Api versteht
+// macht aus dem Zod Schema das Format, das die API versteht
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
-type Pruefungsform = "schriftlich" | "mündlich" | "portfolio";
 
+// So sieht eine Frist im Programm aus (in der Datenbank ist das Datum nur Text)
 type Frist = {
     titel: string;
     datum: Date;
     kurs: string;
-    pruefungsform?: Pruefungsform
 };
 
-// Vorgegebens Schema für Claude durch Zod
+// Schema, in dem Claude antworten muss (describe sagt ihm zusätzlich, wie das Datum aussehen soll)
 const FristSchema = z.object({
     titel: z.string(),
     datum: z.string().describe("Datum in Format JJJJ-MM-TT"),
     kurs: z.string()
 });
 
-// Claude antwortet mit einem Objekt, darin eine Liste mit Fristen
+// Claude antwortet mit einem Objekt, darin steckt die Liste mit allen Fristen
 const AntwortSchema = z.object({
     fristen: z.array(FristSchema)
 });
 
-const beispiel: Frist = {
-    titel: "Prüfungsanmeldung",
-    datum: new Date("2026-11-22"),
-    kurs: "SWTPP",
-    pruefungsform: "portfolio"    
-};
-
-let formText = "";
-if (beispiel.pruefungsform) {
-    formText = ` (${beispiel.pruefungsform})`;
-}
-
-console.log(`${beispiel.kurs}${formText}: ${beispiel.titel} bis ${beispiel.datum.toLocaleDateString("de-DE")}`);
-
-
-
-// Öffnet die echte Datenbank (wird beim ersten Mal angelegt)
+// Öffnet die Datenbank (beim ersten Start wird die Datei neu angelegt)
 const db = datenbankOeffnen("fristen.db");
 
-// Erstellt durch einen Client die Verbindung zu Claude
+// Verbindung zu Claude (den API Key holt sich das SDK selbst aus der .env)
 const client = new Anthropic();
 
 
-// Liest alle Mails aus dem Ordner (erst Beispiel Mails, später "mails")
+// Liest alle Mails aus dem Ordner (zum Testen "beispiel-mails", sonst "mails")
 const mails = await mailsLesen("mails");
 
 
-// kontrolle ob übergebene daten auch fehlerfrei und risikofrei sind ( gefahr auf sql injection)
+// Prepared Statement: die ? werden erst später sicher eingesetzt, dadurch keine SQL Injection
+// INSERT OR IGNORE überspringt Fristen, die es schon gibt (wegen UNIQUE in der Tabelle)
 const einfuegen = db.prepare(`
     INSERT OR IGNORE INTO fristen (titel, datum, kurs, quelle)
     VALUES (?, ?, ?, ?)
@@ -76,8 +60,8 @@ for (const mail of mails) {
 
     console.log(`\n--- ${mail.datei} ---`);                                                                    // \n für Leerzeile, damit man die Mails besser auseinanderhält
 
-    // Schickt die Anfrage mit Spezifikationen (Kann man auch auf ein billigers Modell stellen, z.b HAIKU was etwas 40mal billiger ist als OPUS)
-    // Schickt die Mail an Claude, Antwort kommt direkt im Format vom AntwortSchema zurück (parse prüft das mit Zod)
+    // Schickt die Mail an Claude, die Antwort kommt direkt im Format vom AntwortSchema zurück (parse prüft das mit Zod)
+    // Mit einem kleineren Modell (z.B. Haiku) wäre es günstiger, Opus ist aber genauer
     const antwort = await client.messages.parse({
         model: "claude-opus-5-5",
         max_tokens: 16000,
@@ -90,16 +74,16 @@ for (const mail of mails) {
     });
 
 
-    if (!antwort.parsed_output) {                                                                               // Falls Antwort nciht dem Schema entspricht
+    if (!antwort.parsed_output) {                                                                               // Falls die Antwort nicht zum Schema passt
         console.log("Claude hat keine gültige Antwort geliefert");
-    } else {                                                                                                    // Die Liste aus Fristen wird durch Map in viele einzelne Listen geteilt in dem vorgegeben Stil
+    } else {                                                                                                    // map macht aus jeder Frist der Antwort ein Frist Objekt
         const fristen: Frist[] = antwort.parsed_output.fristen.map((f) => ({
             titel: f.titel,
-            datum: new Date(f.datum),                                                                           // new Date macht aus dem eigentlichen String ein richtiges Datum. Wandelt JSON in Date Datentyp um
+            datum: new Date(f.datum),                                                                           // new Date macht aus dem Text (JJJJ-MM-TT) ein richtiges Datum
             kurs: f.kurs
         }));
 
-        // For schleife gibt jede Frist korrekt aus und ändert die Art das Datum anzugeben von ISO auf Deutsche Norm
+        // Gibt jede Frist in der Konsole aus, das Datum im deutschen Format statt ISO
         for (const frist of fristen) {
             console.log(`${frist.kurs}: ${frist.titel} bis ${frist.datum.toLocaleDateString("de-DE")}`);
         }
