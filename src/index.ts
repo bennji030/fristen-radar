@@ -29,14 +29,15 @@ const AntwortSchema = z.object({
 });
 
 // Öffnet die Datenbank (beim ersten Start wird die Datei neu angelegt)
-const db = datenbankOeffnen("fristen.db");
+// (Datei änderbar über DB_DATEI=..., Standard fristen.db)
+const db = datenbankOeffnen(process.env.DB_DATEI ?? "fristen.db");
 
 // Verbindung zu Claude (den API Key holt sich das SDK selbst aus der .env)
 const client = new Anthropic();
 
 
-// Liest alle Mails aus dem Ordner (zum Testen "beispiel-mails", sonst "mails")
-const mails = await mailsLesen("mails");
+// Liest alle Mails aus dem Ordner (änderbar über MAILS_ORDNER=..., Standard mails)
+const mails = await mailsLesen(process.env.MAILS_ORDNER ?? "mails");
 
 
 // Prepared Statement: die ? werden erst später sicher eingesetzt, dadurch keine SQL Injection

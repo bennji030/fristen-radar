@@ -4,7 +4,8 @@ import { readFile } from "node:fs/promises";
 import { datenbankOeffnen, kommendeFristen } from "./db.js";
 import { html } from "./html.js";
 
-const db = datenbankOeffnen("fristen.db");
+// Datei änderbar über DB_DATEI=... (Standard fristen.db)
+const db = datenbankOeffnen(process.env.DB_DATEI ?? "fristen.db");
 
 // Port änderbar über PORT=... (Standard 3000)
 const port = Number(process.env.PORT ?? 3000);
