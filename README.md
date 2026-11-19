@@ -1,68 +1,70 @@
 # Fristen-Radar
 
-Findet Fristen in Uni-Mails mit KI und zeigt sie sortiert auf einer Seite.
+[Deutsche Fassung](README.de.md)
 
-![Fristen-Radar im hellen Modus](docs/screenshot-hell.png)
+Finds deadlines in university emails with AI and shows them sorted on one page.
+("Fristen" is German for deadlines. The interface is in German.)
 
-![Fristen-Radar im dunklen Modus](docs/screenshot-dunkel.png)
+![Fristen-Radar in light mode](docs/screenshot-hell.png)
 
-## Warum dieses Projekt
+![Fristen-Radar in dark mode](docs/screenshot-dunkel.png)
 
-Im Oktober 2026 habe ich die Tutoriumsanmeldung für ITPDG verpasst.
-Von der Uni bekommt man viele verschiedene Fristen und Mails und verliert dabei schnell den Überblick.
-Deshalb wollte ich ein Programm, das Fristen aus Mails herausholt und an einem Ort sammelt.
+## Why this project
 
-## Wie es funktioniert
+In October 2026 I missed the sign-up for a tutorial at university.
+You get a lot of different deadlines and emails from university and quickly lose track of them.
+So I wanted a program that pulls the deadlines out of the emails and collects them in one place.
 
-1. Mails liegen als Textdateien in einem Ordner.
-2. Jede neue Mail geht an die Claude-API. Ein Zod-Schema gibt vor, in welcher Form die Fristen zurückkommen.
-3. Die Fristen landen in einer SQLite-Datenbank. Doppelte Fristen verhindert `UNIQUE`, und jede Mail wird nur einmal verarbeitet.
-4. Eine kleine Weboberfläche zeigt die kommenden Fristen sortiert nach Datum, im hellen oder dunklen Modus.
+## How it works
 
-## Technik
+1. Emails are stored as text files in a folder.
+2. Every new email is sent to the Claude API. A Zod schema defines the form in which the deadlines come back.
+3. The deadlines are saved in a SQLite database. `UNIQUE` prevents duplicates, and every email is processed only once.
+4. A small web interface shows the upcoming deadlines sorted by date, in light or dark mode.
 
-- TypeScript auf Node.js
-- Claude-API (`@anthropic-ai/sdk`) mit strukturierter Antwort über Zod
-- SQLite (`node:sqlite`) mit Prepared Statements gegen SQL-Injection
-- Webserver mit `node:http`, ohne Framework
-- 8 automatische Tests mit `node:test` (der KI-Aufruf ist bewusst nicht getestet, weil seine Antworten nicht immer gleich sind)
+## Tech
 
-## Starten
+- TypeScript on Node.js
+- Claude API (`@anthropic-ai/sdk`) with structured output via Zod
+- SQLite (`node:sqlite`) with prepared statements against SQL injection
+- Web server with `node:http`, no framework
+- 8 automated tests with `node:test` (the AI call is deliberately not tested, because its answers are not always the same)
 
-Du brauchst Node.js 26 (getestet mit 26.4) und einen API-Schlüssel von Anthropic.
-Das Auswerten der Mails kostet ein paar Cent.
+## Getting started
+
+You need Node.js 26 (tested with 26.4) and an API key from Anthropic.
+Processing the emails costs a few cents.
 
 ```bash
 git clone https://github.com/bennji030/fristen-radar.git
 cd fristen-radar
 npm install
-echo "ANTHROPIC_API_KEY=dein-schluessel" > .env
+echo "ANTHROPIC_API_KEY=your-key" > .env
 
-# Beispiel-Mails auswerten
+# process the example emails
 MAILS_ORDNER=beispiel-mails DB_DATEI=demo.db npm run dev
 
-# Seite starten, danach http://localhost:3000 öffnen
+# start the page, then open http://localhost:3000
 DB_DATEI=demo.db npm run server
 
-# Tests
+# tests
 npm test
 ```
 
-## Wie ich mit Claude Code entwickle
+## How I work with Claude Code
 
-Claude Code hat den Prozess dauerhaft begleitet, doch jede Zeile habe ich geprüft.
-Teils habe ich selbst getippt, teils hat Claude Code Sachen übernommen, zum Beispiel das Erstellen der Testdatenbank oder das Aufsetzen der Weboberfläche.
+Claude Code accompanied the whole process, but I checked every line.
+Some parts I typed myself, others Claude Code took over, for example creating the test database or setting up the web interface.
 
-## Stand und Ausblick
+## Status and next steps
 
-Das hier ist Phase 1, eine erste lauffähige Version.
-Ich führe das Projekt weiter, wenn ich wieder Zeit habe.
+This is phase 1, a first working version.
 
-Das Projekt läuft lokal. Mails müssen bisher von Hand als Textdateien abgelegt werden.
-Suchleiste und Filter sind noch nicht funktionsfähig, sie sind bisher nur gestaltet.
+The project runs locally. Emails are still placed in the folder by hand as text files.
+The search bar and filters are already designed and will be connected together with the categories.
 
-Geplant für später:
-- Kategorien wie Klausur, Abgabe und Anmeldung, damit Suche und Filter funktionieren
-- einheitlichere Antworten der KI
-- Docker und eine öffentliche Demo
-- automatischer Mail-Abruf und Erinnerungen
+Next steps:
+- categories such as exam, submission and sign-up, so that search and filters work
+- more consistent answers from the AI
+- Docker and a public demo
+- automatic email fetching and reminders
